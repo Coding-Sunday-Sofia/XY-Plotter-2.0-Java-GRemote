@@ -13,10 +13,60 @@ import processing.core.PApplet;
 import processing.serial.Serial;
 
 import java.io.File;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-public class GRemote extends PApplet {
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+
+import org.usb4java.*;
+
+public class GRemoteFX extends Application {
+	private int baudrate = 115200;
+
+	private Integer[] baud_values = {9600, 19200, 38400, 57600, 115200};
+
+	@Override
+	public void start(Stage primary) throws Exception {
+		primary.setTitle("GRemoteFX");
+
+		HBox hbox = new HBox();
+
+		MenuButton baudDropDown = new MenuButton("BAUD");
+		for (int i = 0; i < baud_values.length; i++) {
+			baudDropDown.getItems()
+					.add(new MenuItem(baud_values[i].toString()));
+		}
+		hbox.getChildren().add(baudDropDown);
+
+		MenuButton portDropDown = new MenuButton("PORT");
+		// for (UsbDevice device : (List<UsbDevice>) UsbHostManager
+		// .getUsbServices().getRootUsbHub().getAttachedUsbDevices()) {
+		// if (device.isUsbHub() == false) {
+		// UsbDeviceDescriptor descriptor = device
+		// .getUsbDeviceDescriptor();
+		// portDropDown.getItems().add(new MenuItem(
+		// descriptor.idVendor() + " " + descriptor.idProduct()));
+		// }
+		// }
+		hbox.getChildren().add(portDropDown);
+
+		primary.setScene(new Scene(hbox, 400, 780));
+		primary.show();
+	}
+
+	public static void main(String[] args) {
+		launch(args);
+	}
+}
+
+class GRemote extends PApplet {
 
 	// GRemoteCNC - mini host interfacing with Arduino GCode Interpreter
 
@@ -26,6 +76,7 @@ public class GRemote extends PApplet {
 	ControlP5 cP5;
 
 	int baudrate = 115200;
+
 	Serial port = null;
 
 	EnumXYZ idx = new EnumXYZ();
@@ -165,7 +216,8 @@ public class GRemote extends PApplet {
 	// keyboard events
 	@Override
 	public void keyPressed() {
-		if (!(PortResponding && (!SendingSequence || SendingSequence && Paused))) {
+		if (!(PortResponding
+				&& (!SendingSequence || SendingSequence && Paused))) {
 			return;
 		}
 
@@ -199,54 +251,65 @@ public class GRemote extends PApplet {
 		if (Jogging_grp.isOpen() && key == 'x' && jog_ddl_idx[idx.X] > 0) {
 			jog_ddl_idx[idx.X] -= 1;
 			jog_ddl_frac[idx.X] = FractionalJog;
-			jog[idx.X] = intCoord(
-					jog_ddl_frac[idx.X] ? jog_frac_value[jog_ddl_idx[idx.X]] : jog_dec_value[jog_ddl_idx[idx.X]]);
+			jog[idx.X] = intCoord(jog_ddl_frac[idx.X]
+					? jog_frac_value[jog_ddl_idx[idx.X]]
+					: jog_dec_value[jog_ddl_idx[idx.X]]);
 		}
 
 		if (Jogging_grp.isOpen() && key == 'X'
-				&& jog_ddl_idx[idx.X] < min(jog_frac_name.length, jog_dec_name.length) - 1) {
+				&& jog_ddl_idx[idx.X] < min(jog_frac_name.length,
+						jog_dec_name.length) - 1) {
 			jog_ddl_idx[idx.X] += 1;
 			jog_ddl_frac[idx.X] = FractionalJog;
-			jog[idx.X] = intCoord(
-					jog_ddl_frac[idx.X] ? jog_frac_value[jog_ddl_idx[idx.X]] : jog_dec_value[jog_ddl_idx[idx.X]]);
+			jog[idx.X] = intCoord(jog_ddl_frac[idx.X]
+					? jog_frac_value[jog_ddl_idx[idx.X]]
+					: jog_dec_value[jog_ddl_idx[idx.X]]);
 		}
 
 		if (Jogging_grp.isOpen() && key == 'y' && jog_ddl_idx[idx.Y] > 0) {
 			jog_ddl_idx[idx.Y] -= 1;
 			jog_ddl_frac[idx.Y] = FractionalJog;
-			jog[idx.Y] = intCoord(
-					jog_ddl_frac[idx.Y] ? jog_frac_value[jog_ddl_idx[idx.Y]] : jog_dec_value[jog_ddl_idx[idx.Y]]);
+			jog[idx.Y] = intCoord(jog_ddl_frac[idx.Y]
+					? jog_frac_value[jog_ddl_idx[idx.Y]]
+					: jog_dec_value[jog_ddl_idx[idx.Y]]);
 		}
 
 		if (Jogging_grp.isOpen() && key == 'Y'
-				&& jog_ddl_idx[idx.Y] < min(jog_frac_name.length, jog_dec_name.length) - 1) {
+				&& jog_ddl_idx[idx.Y] < min(jog_frac_name.length,
+						jog_dec_name.length) - 1) {
 			jog_ddl_idx[idx.Y] += 1;
 			jog_ddl_frac[idx.Y] = FractionalJog;
-			jog[idx.Y] = intCoord(
-					jog_ddl_frac[idx.Y] ? jog_frac_value[jog_ddl_idx[idx.Y]] : jog_dec_value[jog_ddl_idx[idx.Y]]);
+			jog[idx.Y] = intCoord(jog_ddl_frac[idx.Y]
+					? jog_frac_value[jog_ddl_idx[idx.Y]]
+					: jog_dec_value[jog_ddl_idx[idx.Y]]);
 		}
 
 		if (Jogging_grp.isOpen() && key == 'z' && jog_ddl_idx[idx.Z] > 0) {
 			jog_ddl_idx[idx.Z] -= 1;
 			jog_ddl_frac[idx.Z] = FractionalJog;
-			jog[idx.Z] = intCoord(
-					jog_ddl_frac[idx.Z] ? jog_frac_value[jog_ddl_idx[idx.Z]] : jog_dec_value[jog_ddl_idx[idx.Z]]);
+			jog[idx.Z] = intCoord(jog_ddl_frac[idx.Z]
+					? jog_frac_value[jog_ddl_idx[idx.Z]]
+					: jog_dec_value[jog_ddl_idx[idx.Z]]);
 		}
 
 		if (Jogging_grp.isOpen() && key == 'Z'
-				&& jog_ddl_idx[idx.Z] < min(jog_frac_name.length, jog_dec_name.length) - 1) {
+				&& jog_ddl_idx[idx.Z] < min(jog_frac_name.length,
+						jog_dec_name.length) - 1) {
 			jog_ddl_idx[idx.Z] += 1;
 			jog_ddl_frac[idx.Z] = FractionalJog;
-			jog[idx.Z] = intCoord(
-					jog_ddl_frac[idx.Z] ? jog_frac_value[jog_ddl_idx[idx.Z]] : jog_dec_value[jog_ddl_idx[idx.Z]]);
+			jog[idx.Z] = intCoord(jog_ddl_frac[idx.Z]
+					? jog_frac_value[jog_ddl_idx[idx.Z]]
+					: jog_dec_value[jog_ddl_idx[idx.Z]]);
 		}
 
 		if (Jogging_grp.isOpen() && (key == 'f' || key == 'F')) {
-			((Toggle) cP5.getController("fractional_jog")).setValue(!FractionalJog);
+			((Toggle) cP5.getController("fractional_jog"))
+					.setValue(!FractionalJog);
 		}
 
 		if (Jogging_grp.isOpen() && (key == 'r' || key == 'R')) {
-			((Toggle) cP5.getController("rapid_positioning")).setValue(!RapidPositioning);
+			((Toggle) cP5.getController("rapid_positioning"))
+					.setValue(!RapidPositioning);
 		}
 
 		if (key == CODED && keyCode == RIGHT) {
@@ -299,10 +362,10 @@ public class GRemote extends PApplet {
 		}
 
 		/*
-		 * because only permitted (for current state) elements are available in the UI,
-		 * we assume that if we received an event, we can handle it without checking
-		 * state the above is not true for keypresses, where state has to be explicitly
-		 * checked before handling event
+		 * because only permitted (for current state) elements are available in
+		 * the UI, we assume that if we received an event, we can handle it
+		 * without checking state the above is not true for keypresses, where
+		 * state has to be explicitly checked before handling event
 		 */
 
 		// baud rate selected
@@ -319,7 +382,8 @@ public class GRemote extends PApplet {
 			}
 
 			try {
-				port = new Serial(this, Serial.list()[(int) event.getValue()], baudrate);
+				port = new Serial(this, Serial.list()[(int) event.getValue()],
+						baudrate);
 			} catch (Exception e) {
 				console_println(": can't open selected port!");
 			}
@@ -364,7 +428,8 @@ public class GRemote extends PApplet {
 			// jog setting selected
 			if (event.getGroup().getName() == "JOG X") {
 				int i = (int) event.getGroup().getValue();
-				jog[idx.X] = intCoord(FractionalJog ? jog_frac_value[i] : jog_dec_value[i]);
+				jog[idx.X] = intCoord(
+						FractionalJog ? jog_frac_value[i] : jog_dec_value[i]);
 				// println(jog[idx.X]);
 				// store current jog dropdown values - workaround to enable
 				// inc/dec of jog
@@ -376,7 +441,8 @@ public class GRemote extends PApplet {
 
 			if (event.getGroup().getName() == "JOG Y") {
 				int i = (int) event.getGroup().getValue();
-				jog[idx.Y] = intCoord(FractionalJog ? jog_frac_value[i] : jog_dec_value[i]);
+				jog[idx.Y] = intCoord(
+						FractionalJog ? jog_frac_value[i] : jog_dec_value[i]);
 				// println(jog[idx.Y]);
 				// store current jog dropdown values - workaround to enable
 				// inc/dec of jog
@@ -388,7 +454,8 @@ public class GRemote extends PApplet {
 
 			if (event.getGroup().getName() == "JOG Z") {
 				int i = (int) event.getGroup().getValue();
-				jog[idx.Z] = intCoord(FractionalJog ? jog_frac_value[i] : jog_dec_value[i]);
+				jog[idx.Z] = intCoord(
+						FractionalJog ? jog_frac_value[i] : jog_dec_value[i]);
 				// println(jog[idx.Z]);
 				// store current jog dropdown values - workaround to enable
 				// inc/dec of jog
@@ -413,13 +480,17 @@ public class GRemote extends PApplet {
 
 			// absolute mode toggle
 			if (event.getController().getName() == "absolute_mode") {
-				command = ((int) event.getController().getValue() == 1) ? "G90" : "G91";
+				command = ((int) event.getController().getValue() == 1)
+						? "G90"
+						: "G91";
 				HaveStringToSend = true;
 			}
 
 			// inch mode toggle
 			if (event.getController().getName() == "inch_mode") {
-				command = ((int) event.getController().getValue() == 1) ? "G20" : "G21";
+				command = ((int) event.getController().getValue() == 1)
+						? "G20"
+						: "G21";
 				HaveStringToSend = true;
 			}
 
@@ -432,7 +503,8 @@ public class GRemote extends PApplet {
 			}
 
 			if (event.getController().getName() == "SAVE") {
-				String[] settingData = { "Setting", ((Textfield) cP5.getController("X_DIR_PIN")).getText(),
+				String[] settingData = {"Setting",
+						((Textfield) cP5.getController("X_DIR_PIN")).getText(),
 						((Textfield) cP5.getController("X_STEP_PIN")).getText(),
 						((Textfield) cP5.getController("X_MIN_PIN")).getText(),
 						((Textfield) cP5.getController("X_MAX_PIN")).getText(),
@@ -446,13 +518,14 @@ public class GRemote extends PApplet {
 						((Textfield) cP5.getController("Z_MAX_PIN")).getText(),
 						((Textfield) cP5.getController("X_PER_MM")).getText(),
 						((Textfield) cP5.getController("Y_PER_MM")).getText(),
-						((Textfield) cP5.getController("X_PER_MM")).getText() };
+						((Textfield) cP5.getController("X_PER_MM")).getText()};
 				Properties props = System.getProperties();
 				String osName = props.getProperty("os.name");
 				if (osName.indexOf("Win") > -1) {
 					saveStrings("setting.ini", settingData);
 				} else {
-					saveStrings("GRemote.app/Contents/setting.ini", settingData);
+					saveStrings("GRemote.app/Contents/setting.ini",
+							settingData);
 				}
 				init_sequence();
 			}
@@ -534,7 +607,8 @@ public class GRemote extends PApplet {
 					for (int i = 0; i < accumulated_jog.length; i++)
 						jog_total += abs(accumulated_jog[i]);
 					if (jog_total > 0) {
-						command = jog_string(accumulated_jog, G_AbsoluteMode, false);
+						command = jog_string(accumulated_jog, G_AbsoluteMode,
+								false);
 						HaveStringToSend = true;
 					}
 					XYZMode = false;
@@ -592,7 +666,8 @@ public class GRemote extends PApplet {
 			// decimals
 			// (accumulated errors from float/double additions/subtractions?)
 			for (int i = 0; i < idx.size(); i++) {
-				homing_limit[i] = (homing_limit[i] >= 0) ? floor(homing_limit[i] * 100) / 100.0f
+				homing_limit[i] = (homing_limit[i] >= 0)
+						? floor(homing_limit[i] * 100) / 100.0f
 						: ceil(homing_limit[i] * 100) / 100.0f;
 			}
 
@@ -624,7 +699,8 @@ public class GRemote extends PApplet {
 			if (event.getController().getName() == "ARC_RADIUS") {
 				float f = arc_radius;
 				arc_radius = isFloat(event.getController().getStringValue())
-						? Float.parseFloat(event.getController().getStringValue())
+						? Float.parseFloat(
+								event.getController().getStringValue())
 						: arc_radius;
 				if (arc_radius <= 0)
 					arc_radius = f;
@@ -635,7 +711,8 @@ public class GRemote extends PApplet {
 			if (event.getController().getName() == "ARC_START") {
 				float f = arc_start;
 				arc_start = isFloat(event.getController().getStringValue())
-						? Float.parseFloat(event.getController().getStringValue())
+						? Float.parseFloat(
+								event.getController().getStringValue())
 						: arc_start;
 				if (arc_start < 0 || arc_start >= 360 || arc_start >= arc_end)
 					arc_start = f;
@@ -646,7 +723,8 @@ public class GRemote extends PApplet {
 			if (event.getController().getName() == "ARC_END") {
 				float f = arc_end;
 				arc_end = isFloat(event.getController().getStringValue())
-						? Float.parseFloat(event.getController().getStringValue())
+						? Float.parseFloat(
+								event.getController().getStringValue())
 						: arc_end;
 				if (arc_end <= 0 || arc_end > 360 || arc_start >= arc_end)
 					arc_end = f;
@@ -672,8 +750,10 @@ public class GRemote extends PApplet {
 						return;
 				if (ArcMode) {
 					arc_offset = ArcCCW ? -90 : 90;
-					command = arc_string(ArcCCW, arc_radius, arc_offset + (ArcCCW ? arc_start : -arc_start),
-							arc_offset + (ArcCCW ? arc_end : -arc_end), G_AbsoluteMode);
+					command = arc_string(ArcCCW, arc_radius,
+							arc_offset + (ArcCCW ? arc_start : -arc_start),
+							arc_offset + (ArcCCW ? arc_end : -arc_end),
+							G_AbsoluteMode);
 					HaveStringToSend = true;
 				} else if (j[idx.X] != 0) {
 					command = jog_string(j, G_AbsoluteMode, false);
@@ -702,11 +782,15 @@ public class GRemote extends PApplet {
 				}
 				if (ArcMode) {
 					arc_offset = ArcCCW ? 90 : -90;
-					command = arc_string(ArcCCW, arc_radius, arc_offset + (ArcCCW ? arc_start : -arc_start),
-							arc_offset + (ArcCCW ? arc_end : -arc_end), G_AbsoluteMode);
+					command = arc_string(ArcCCW, arc_radius,
+							arc_offset + (ArcCCW ? arc_start : -arc_start),
+							arc_offset + (ArcCCW ? arc_end : -arc_end),
+							G_AbsoluteMode);
 					HaveStringToSend = true;
 				} else {
-					command = ZeroMode ? "G92 X0" : jog_string(j, G_AbsoluteMode, false);
+					command = ZeroMode
+							? "G92 X0"
+							: jog_string(j, G_AbsoluteMode, false);
 					HaveStringToSend = true;
 				}
 				// if (ZeroMode) { ZeroMode = false; UI_ClearGCodeTF = true; }
@@ -727,8 +811,10 @@ public class GRemote extends PApplet {
 						return;
 				if (ArcMode) {
 					arc_offset = ArcCCW ? 0 : 180;
-					command = arc_string(ArcCCW, arc_radius, arc_offset + (ArcCCW ? arc_start : -arc_start),
-							arc_offset + (ArcCCW ? arc_end : -arc_end), G_AbsoluteMode);
+					command = arc_string(ArcCCW, arc_radius,
+							arc_offset + (ArcCCW ? arc_start : -arc_start),
+							arc_offset + (ArcCCW ? arc_end : -arc_end),
+							G_AbsoluteMode);
 					HaveStringToSend = true;
 				} else if (j[idx.Y] != 0) {
 					command = jog_string(j, G_AbsoluteMode, false);
@@ -757,11 +843,15 @@ public class GRemote extends PApplet {
 				}
 				if (ArcMode) {
 					arc_offset = ArcCCW ? -180 : 0;
-					command = arc_string(ArcCCW, arc_radius, arc_offset + (ArcCCW ? arc_start : -arc_start),
-							arc_offset + (ArcCCW ? arc_end : -arc_end), G_AbsoluteMode);
+					command = arc_string(ArcCCW, arc_radius,
+							arc_offset + (ArcCCW ? arc_start : -arc_start),
+							arc_offset + (ArcCCW ? arc_end : -arc_end),
+							G_AbsoluteMode);
 					HaveStringToSend = true;
 				} else {
-					command = ZeroMode ? "G92 Y0" : jog_string(j, G_AbsoluteMode, false);
+					command = ZeroMode
+							? "G92 Y0"
+							: jog_string(j, G_AbsoluteMode, false);
 					HaveStringToSend = true;
 				}
 				// if (ZeroMode) { ZeroMode = false; UI_ClearGCodeTF = true; }
@@ -806,7 +896,9 @@ public class GRemote extends PApplet {
 					memorySet[idx.Z] = true;
 					return;
 				}
-				command = ZeroMode ? "G92 Z0" : jog_string(j, G_AbsoluteMode, false);
+				command = ZeroMode
+						? "G92 Z0"
+						: jog_string(j, G_AbsoluteMode, false);
 				HaveStringToSend = true;
 				// if (ZeroMode) { ZeroMode = false; UI_ClearGCodeTF = true; }
 			}
@@ -870,9 +962,9 @@ public class GRemote extends PApplet {
 		}
 
 		/*
-		 * if we received something other than OK or START after port reset, assume port
-		 * is responding kludgy but should work for firmware that supports 'ok' but not
-		 * 'start' e.g. Grbl (as of 0.7d)
+		 * if we received something other than OK or START after port reset,
+		 * assume port is responding kludgy but should work for firmware that
+		 * supports 'ok' but not 'start' e.g. Grbl (as of 0.7d)
 		 */
 		if (PortWasReset) {
 			println("port reset, sending init sequence");
@@ -931,7 +1023,8 @@ public class GRemote extends PApplet {
 
 		public String render() {
 			String out = "";
-			int renderFirst[] = { idx.X, idx.Y, idx.Z, idx.I, idx.J, idx.K, idx.F };
+			int renderFirst[] = {idx.X, idx.Y, idx.Z, idx.I, idx.J, idx.K,
+					idx.F};
 			boolean RenderedYet[] = new boolean[idx.size()];
 			for (int i = 0; i < RenderedYet.length; i++)
 				RenderedYet[i] = false;
@@ -948,7 +1041,8 @@ public class GRemote extends PApplet {
 
 			for (int i = 0; i < renderFirst.length; i++) {
 				if (this.has[renderFirst[i]]) {
-					out += (" " + idx.strVal[renderFirst[i]] + this.value[renderFirst[i]]);
+					out += (" " + idx.strVal[renderFirst[i]]
+							+ this.value[renderFirst[i]]);
 					RenderedYet[renderFirst[i]] = true;
 				}
 			}
@@ -980,9 +1074,11 @@ public class GRemote extends PApplet {
 				// there could be other commands e.g. F10 set feedrate
 				if (this.command != this.NOP)
 					for (int i = 0; i < this.idx.size(); i++)
-						if (token.substring(0, 1).toUpperCase().equals(this.idx.strVal[i])) {
+						if (token.substring(0, 1).toUpperCase()
+								.equals(this.idx.strVal[i])) {
 							this.has[i] = true;
-							this.value[i] = Float.parseFloat(token.substring(1));
+							this.value[i] = Float
+									.parseFloat(token.substring(1));
 						}
 			}
 		}
@@ -1028,7 +1124,8 @@ public class GRemote extends PApplet {
 			int startCmtIdx = gcode_sequence[next_gcode_line].indexOf('(');
 			int endCmtIdx = gcode_sequence[next_gcode_line].indexOf(')');
 			if (startCmtIdx > -1 && endCmtIdx > -1) {
-				gcode_sequence[next_gcode_line] = gcode_sequence[next_gcode_line].substring(0, startCmtIdx);
+				gcode_sequence[next_gcode_line] = gcode_sequence[next_gcode_line]
+						.substring(0, startCmtIdx);
 
 			}
 			if (gcode_sequence[next_gcode_line].trim().equals(""))
@@ -1055,62 +1152,65 @@ public class GRemote extends PApplet {
 
 		if (cmd.command == cmd.G) {
 			switch (cmd.code) {
-			// Parse GCode and adjust current position (limited by current
-			// resolution)
-			case 0:
-			case 1:
-			case 2:
-			case 3:
-				for (int i = 0; i < xyz.size(); i++)
-					if (cmd.has[xyz.toAZ(xyz.X + i)])
-						position[xyz.X + i] = G_AbsoluteMode ? intCoord(cmd.value[xyz.toAZ(xyz.X + i)])
-								: (position[xyz.X + i] + intCoord(cmd.value[xyz.toAZ(xyz.X + i)]));
-				break;
+				// Parse GCode and adjust current position (limited by current
+				// resolution)
+				case 0 :
+				case 1 :
+				case 2 :
+				case 3 :
+					for (int i = 0; i < xyz.size(); i++)
+						if (cmd.has[xyz.toAZ(xyz.X + i)])
+							position[xyz.X + i] = G_AbsoluteMode
+									? intCoord(cmd.value[xyz.toAZ(xyz.X + i)])
+									: (position[xyz.X + i] + intCoord(
+											cmd.value[xyz.toAZ(xyz.X + i)]));
+					break;
 
-			// Intercept absolute and inch mode commands and change state
-			// Return false to avoid duplicate command from toggles
-			// triggered by state
-			// change, unless state doesn't change
-			case 20:
-			case 21:
-				// set waiting state early to avoid triggering UI event and
-				// duplicate command
-				WaitingForResponse = true;
-				boolean Inches = G_InchMode;
-				G_InchMode = (cmd.code == 20) ? true : false;
-				if (Inches != G_InchMode) {
-					if (G_InchMode) {
-						feedInc /= 25;
-						feed[xyz.X] /= 25;
-						feed[xyz.Y] /= 25;
-						feed[xyz.Z] /= 25;
-						homingInfinity /= 25;
-						homingFeed /= 25;
-					} else {
-						feedInc *= 25;
-						feed[xyz.X] *= 25;
-						feed[xyz.Y] *= 25;
-						feed[xyz.Z] *= 25;
-						homingInfinity *= 25;
-						homingFeed *= 25;
+				// Intercept absolute and inch mode commands and change state
+				// Return false to avoid duplicate command from toggles
+				// triggered by state
+				// change, unless state doesn't change
+				case 20 :
+				case 21 :
+					// set waiting state early to avoid triggering UI event and
+					// duplicate command
+					WaitingForResponse = true;
+					boolean Inches = G_InchMode;
+					G_InchMode = (cmd.code == 20) ? true : false;
+					if (Inches != G_InchMode) {
+						if (G_InchMode) {
+							feedInc /= 25;
+							feed[xyz.X] /= 25;
+							feed[xyz.Y] /= 25;
+							feed[xyz.Z] /= 25;
+							homingInfinity /= 25;
+							homingFeed /= 25;
+						} else {
+							feedInc *= 25;
+							feed[xyz.X] *= 25;
+							feed[xyz.Y] *= 25;
+							feed[xyz.Z] *= 25;
+							homingInfinity *= 25;
+							homingFeed *= 25;
+						}
 					}
-				}
-				break;
-			case 90:
-			case 91:
-				// set waiting state early to avoid triggering UI event and
-				// duplicate command
-				WaitingForResponse = true;
-				G_AbsoluteMode = (cmd.code == 90) ? true : false;
-				break;
+					break;
+				case 90 :
+				case 91 :
+					// set waiting state early to avoid triggering UI event and
+					// duplicate command
+					WaitingForResponse = true;
+					G_AbsoluteMode = (cmd.code == 90) ? true : false;
+					break;
 
-			case 92:
-				for (int i = 0; i < xyz.size(); i++)
-					if (cmd.has[xyz.toAZ(xyz.X + i)])
-						position[xyz.X + i] = intCoord(cmd.value[xyz.toAZ(xyz.X + i)]); // value
-																						// should
-																						// be 0;
-				break;
+				case 92 :
+					for (int i = 0; i < xyz.size(); i++)
+						if (cmd.has[xyz.toAZ(xyz.X + i)])
+							position[xyz.X + i] = intCoord(
+									cmd.value[xyz.toAZ(xyz.X + i)]); // value
+																		// should
+																		// be 0;
+					break;
 
 			}
 			// println("position = X"+floatCoord(position[xyz.X])+"
@@ -1135,24 +1235,25 @@ public class GRemote extends PApplet {
 	public void init_sequence() {
 		String[] s = {};
 
+		s = append(s, String.format("$1 X%s Y%s Z%s",
+				((Textfield) cP5.getController("X_STEP_PIN")).getText(),
+				((Textfield) cP5.getController("Y_STEP_PIN")).getText(),
+				((Textfield) cP5.getController("Z_STEP_PIN")).getText()));
+		s = append(s, String.format("$2 X%s Y%s Z%s",
+				((Textfield) cP5.getController("X_DIR_PIN")).getText(),
+				((Textfield) cP5.getController("Y_DIR_PIN")).getText(),
+				((Textfield) cP5.getController("Z_DIR_PIN")).getText()));
+		s = append(s, String.format("$3 X%s Y%s Z%s",
+				((Textfield) cP5.getController("X_MIN_PIN")).getText(),
+				((Textfield) cP5.getController("Y_MIN_PIN")).getText(),
+				((Textfield) cP5.getController("Z_MIN_PIN")).getText()));
+		s = append(s, String.format("$4 X%s Y%s Z%s",
+				((Textfield) cP5.getController("X_MAX_PIN")).getText(),
+				((Textfield) cP5.getController("Y_MAX_PIN")).getText(),
+				((Textfield) cP5.getController("Z_MAX_PIN")).getText()));
 		s = append(s,
-				String.format("$1 X%s Y%s Z%s", ((Textfield) cP5.getController("X_STEP_PIN")).getText(),
-						((Textfield) cP5.getController("Y_STEP_PIN")).getText(),
-						((Textfield) cP5.getController("Z_STEP_PIN")).getText()));
-		s = append(s,
-				String.format("$2 X%s Y%s Z%s", ((Textfield) cP5.getController("X_DIR_PIN")).getText(),
-						((Textfield) cP5.getController("Y_DIR_PIN")).getText(),
-						((Textfield) cP5.getController("Z_DIR_PIN")).getText()));
-		s = append(s,
-				String.format("$3 X%s Y%s Z%s", ((Textfield) cP5.getController("X_MIN_PIN")).getText(),
-						((Textfield) cP5.getController("Y_MIN_PIN")).getText(),
-						((Textfield) cP5.getController("Z_MIN_PIN")).getText()));
-		s = append(s,
-				String.format("$4 X%s Y%s Z%s", ((Textfield) cP5.getController("X_MAX_PIN")).getText(),
-						((Textfield) cP5.getController("Y_MAX_PIN")).getText(),
-						((Textfield) cP5.getController("Z_MAX_PIN")).getText()));
-		s = append(s,
-				String.format("$6 X%s Y%s Z%s", ((Textfield) cP5.getController("X_PER_MM")).getText(),
+				String.format("$6 X%s Y%s Z%s",
+						((Textfield) cP5.getController("X_PER_MM")).getText(),
 						((Textfield) cP5.getController("Y_PER_MM")).getText(),
 						((Textfield) cP5.getController("Z_PER_MM")).getText()));
 		s = append(s, G_AbsoluteMode ? "G90" : "G91");
@@ -1202,7 +1303,10 @@ public class GRemote extends PApplet {
 			// rapid positioning to infinity, rapid stop when limit switches are
 			// hit
 			if (homing_limit[i] != 0)
-				s1 += " " + idx.strVal[i] + (homing_limit[i] > 0 ? homingInfinity : -homingInfinity);
+				s1 += " " + idx.strVal[i]
+						+ (homing_limit[i] > 0
+								? homingInfinity
+								: -homingInfinity);
 			// rapid move to future zero
 			if (homing_limit[i] != 0)
 				s2 += " " + idx.strVal[i] + (-homing_limit[i]);
@@ -1245,7 +1349,8 @@ public class GRemote extends PApplet {
 
 		for (int i = 0; i < jog.length; i++)
 			if (jog[i] != 0 || RenderZero) {
-				gcode += (" " + xyz.strVal[i] + floatCoord(Absolute ? jog[i] + position[i] : jog[i]));
+				gcode += (" " + xyz.strVal[i]
+						+ floatCoord(Absolute ? jog[i] + position[i] : jog[i]));
 				totaljog += abs(jog[i]);
 				if (feed[i] < minFeed)
 					minFeed = feed[i];
@@ -1260,10 +1365,11 @@ public class GRemote extends PApplet {
 		return gcode;
 	}
 
-	public String arc_string(boolean CCW, float R, float start, float end, boolean Absolute) {
+	public String arc_string(boolean CCW, float R, float start, float end,
+			boolean Absolute) {
 		String gcode = CCW ? "G3" : "G2";
-		int start_xy[] = { 0, 0 };
-		int end_xy[] = { 0, 0 };
+		int start_xy[] = {0, 0};
+		int end_xy[] = {0, 0};
 
 		start_xy = intCoord(polar2cartesian(R, start));
 		end_xy = intCoord(polar2cartesian(R, end));
@@ -1272,8 +1378,10 @@ public class GRemote extends PApplet {
 
 		// I,J = -start_xy (I,J are always relative)
 		// X,Y = end_xy - start_xy (relative)
-		gcode += " X" + floatCoord(end_xy[idx.X] - start_xy[idx.X] + (Absolute ? position[idx.X] : 0));
-		gcode += " Y" + floatCoord(end_xy[idx.Y] - start_xy[idx.Y] + (Absolute ? position[idx.Y] : 0));
+		gcode += " X" + floatCoord(end_xy[idx.X] - start_xy[idx.X]
+				+ (Absolute ? position[idx.X] : 0));
+		gcode += " Y" + floatCoord(end_xy[idx.Y] - start_xy[idx.Y]
+				+ (Absolute ? position[idx.Y] : 0));
 		gcode += " I" + floatCoord(-start_xy[idx.X]);
 		gcode += " J" + floatCoord(-start_xy[idx.Y]);
 
@@ -1302,11 +1410,20 @@ public class GRemote extends PApplet {
 
 	public String mem_string() {
 		String s = "MEM:";
-		s += memorySet[idx.X] ? (" X" + floatCoord(G_AbsoluteMode ? memory[idx.X] : memory[idx.X] - position[idx.X]))
+		s += memorySet[idx.X]
+				? (" X" + floatCoord(G_AbsoluteMode
+						? memory[idx.X]
+						: memory[idx.X] - position[idx.X]))
 				: "";
-		s += memorySet[idx.Y] ? (" Y" + floatCoord(G_AbsoluteMode ? memory[idx.Y] : memory[idx.Y] - position[idx.Y]))
+		s += memorySet[idx.Y]
+				? (" Y" + floatCoord(G_AbsoluteMode
+						? memory[idx.Y]
+						: memory[idx.Y] - position[idx.Y]))
 				: "";
-		s += memorySet[idx.Z] ? (" Z" + floatCoord(G_AbsoluteMode ? memory[idx.Z] : memory[idx.Z] - position[idx.Z]))
+		s += memorySet[idx.Z]
+				? (" Z" + floatCoord(G_AbsoluteMode
+						? memory[idx.Z]
+						: memory[idx.Z] - position[idx.Z]))
 				: "";
 		return s;
 	}
@@ -1321,13 +1438,13 @@ public class GRemote extends PApplet {
 	int next_line = 0;
 	String[] console = new String[console_size];
 	String[] ord_console = new String[console_size];
-	String[] jog_buttons = { "X+", "X-", "Y+", "Y-", "Z+", "Z-" };
-	String[] jog_toggles = { "arc_mode", "xyz_mode", "zero_mode", "mem_mode" };
-	String[] jog_frac_name = { "1/32", "1/16", "1/8", "1/4", "1/2", "1" };
-	Float[] jog_frac_value = { 0.03125f, 0.0625f, 0.125f, 0.25f, 0.5f, 1.0f };
-	String[] jog_dec_name = { "0.001", "0.01", "0.1", "1", "10", "100" };
-	Float[] jog_dec_value = { 0.001f, 0.01f, 0.1f, 1.0f, 10.0f, 100.0f };
-	Integer[] baud_values = { 9600, 19200, 38400, 57600, 115200 };
+	String[] jog_buttons = {"X+", "X-", "Y+", "Y-", "Z+", "Z-"};
+	String[] jog_toggles = {"arc_mode", "xyz_mode", "zero_mode", "mem_mode"};
+	String[] jog_frac_name = {"1/32", "1/16", "1/8", "1/4", "1/2", "1"};
+	Float[] jog_frac_value = {0.03125f, 0.0625f, 0.125f, 0.25f, 0.5f, 1.0f};
+	String[] jog_dec_name = {"0.001", "0.01", "0.1", "1", "10", "100"};
+	Float[] jog_dec_value = {0.001f, 0.01f, 0.1f, 1.0f, 10.0f, 100.0f};
+	Integer[] baud_values = {9600, 19200, 38400, 57600, 115200};
 	DropdownList jogX_ddl, jogY_ddl, jogZ_ddl;
 	ControlGroup<?> Jogging_grp;
 	ControlGroup<?> Homing_grp;
@@ -1384,8 +1501,10 @@ public class GRemote extends PApplet {
 		console_ta.setText(join(ord_console, '\n'));
 
 		for (int i = 0; i < idx.size(); i++) {
-			cP5.getController(idx.strVal[i] + "_POS").setVisible(PortResponding);
-			((Textlabel) cP5.getController(idx.strVal[i] + "_POS")).setValue(idx.strVal[i] + floatCoord(position[i]));
+			cP5.getController(idx.strVal[i] + "_POS")
+					.setVisible(PortResponding);
+			((Textlabel) cP5.getController(idx.strVal[i] + "_POS"))
+					.setValue(idx.strVal[i] + floatCoord(position[i]));
 		}
 
 		if (port == null || SendingSequence && !Paused) {
@@ -1399,7 +1518,8 @@ public class GRemote extends PApplet {
 			}
 
 			if (XYZMode == true) {
-				((Textfield) cP5.getController("GCODE")).setText(jog_string(accumulated_jog, G_AbsoluteMode, true));
+				((Textfield) cP5.getController("GCODE")).setText(
+						jog_string(accumulated_jog, G_AbsoluteMode, true));
 			}
 
 			if (ZeroMode == true) {
@@ -1418,26 +1538,34 @@ public class GRemote extends PApplet {
 	public void setup_toggles(int x, int y) {
 		Toggle toggle;
 
-		toggle = cP5.addToggle("sending_LED").setValue(false).setPosition(x, y).setSize(14, 14).setLabel("SENDING")
-				.setLock(true).setColorBackground(color(0, 80, 0)).setColorActive(color(0, 255, 0));
+		toggle = cP5.addToggle("sending_LED").setValue(false).setPosition(x, y)
+				.setSize(14, 14).setLabel("SENDING").setLock(true)
+				.setColorBackground(color(0, 80, 0))
+				.setColorActive(color(0, 255, 0));
 		toggle.getCaptionLabel().getStyle().marginTop = -14;
 		toggle.getCaptionLabel().getStyle().marginLeft = 18;
 
-		toggle = cP5.addToggle("paused_LED").setValue(false).setPosition(x, y + 20).setSize(14, 14).setLabel("PAUSED")
-				.setLock(true).setColorBackground(color(80, 80, 0)).setColorActive(color(255, 255, 0));
+		toggle = cP5.addToggle("paused_LED").setValue(false)
+				.setPosition(x, y + 20).setSize(14, 14).setLabel("PAUSED")
+				.setLock(true).setColorBackground(color(80, 80, 0))
+				.setColorActive(color(255, 255, 0));
 		toggle.getCaptionLabel().getStyle().marginTop = -14;
 		toggle.getCaptionLabel().getStyle().marginLeft = 18;
 
-		toggle = cP5.addToggle("waiting_LED").setValue(false).setPosition(x, y + 40).setSize(14, 14).setLabel("WAITING")
-				.setLock(true).setColorBackground(color(80, 0, 0)).setColorActive(color(255, 0, 0));
+		toggle = cP5.addToggle("waiting_LED").setValue(false)
+				.setPosition(x, y + 40).setSize(14, 14).setLabel("WAITING")
+				.setLock(true).setColorBackground(color(80, 0, 0))
+				.setColorActive(color(255, 0, 0));
 		toggle.getCaptionLabel().getStyle().marginTop = -14;
 		toggle.getCaptionLabel().getStyle().marginLeft = 18;
 
-		toggle = cP5.addToggle("absolute_mode").setPosition(x + 75, y).setSize(14, 14).setLabel("ABSOLUTE");
+		toggle = cP5.addToggle("absolute_mode").setPosition(x + 75, y)
+				.setSize(14, 14).setLabel("ABSOLUTE");
 		toggle.getCaptionLabel().getStyle().marginTop = -14;
 		toggle.getCaptionLabel().getStyle().marginLeft = 18;
 
-		toggle = cP5.addToggle("inch_mode").setPosition(x + 75, y + 20).setSize(14, 14).setLabel("INCHES");
+		toggle = cP5.addToggle("inch_mode").setPosition(x + 75, y + 20)
+				.setSize(14, 14).setLabel("INCHES");
 		toggle.getCaptionLabel().getStyle().marginTop = -14;
 		toggle.getCaptionLabel().getStyle().marginLeft = 18;
 	}
@@ -1455,51 +1583,63 @@ public class GRemote extends PApplet {
 		cP5.getController("inch_mode").setLock(SendingSequence && !Paused);
 
 		// set values
-		if ((int) cP5.getController("sending_LED").getValue() != (SendingSequence ? 1 : 0)) {
-			cP5.getController("sending_LED").setValue((SendingSequence ? 1 : 0));
+		if ((int) cP5.getController("sending_LED")
+				.getValue() != (SendingSequence ? 1 : 0)) {
+			cP5.getController("sending_LED")
+					.setValue((SendingSequence ? 1 : 0));
 		}
 
-		if ((int) cP5.getController("paused_LED").getValue() != (Paused ? 1 : 0)) {
+		if ((int) cP5.getController("paused_LED")
+				.getValue() != (Paused ? 1 : 0)) {
 			cP5.getController("paused_LED").setValue((Paused ? 1 : 0));
 		}
 
-		if ((int) cP5.getController("waiting_LED").getValue() != (WaitingForResponse ? 1 : 0)) {
-			cP5.getController("waiting_LED").setValue((WaitingForResponse ? 1 : 0));
+		if ((int) cP5.getController("waiting_LED")
+				.getValue() != (WaitingForResponse ? 1 : 0)) {
+			cP5.getController("waiting_LED")
+					.setValue((WaitingForResponse ? 1 : 0));
 		}
 
-		if ((int) cP5.getController("absolute_mode").getValue() != (G_AbsoluteMode ? 1 : 0)) {
-			cP5.getController("absolute_mode").setValue((G_AbsoluteMode ? 1 : 0));
+		if ((int) cP5.getController("absolute_mode")
+				.getValue() != (G_AbsoluteMode ? 1 : 0)) {
+			cP5.getController("absolute_mode")
+					.setValue((G_AbsoluteMode ? 1 : 0));
 		}
 
-		if ((int) cP5.getController("inch_mode").getValue() != (G_InchMode ? 1 : 0)) {
+		if ((int) cP5.getController("inch_mode")
+				.getValue() != (G_InchMode ? 1 : 0)) {
 			cP5.getController("inch_mode").setValue((G_InchMode ? 1 : 0));
 		}
 	}
 
 	// port selection functions
 	public void setup_port_selector(int x, int y, int x2, int y2) {
-		DropdownList baud_ddl = cP5.addDropdownList("BAUD", x, y + 10, 80, 180).setBarHeight(28).setOpen(false);
-		baud_ddl.getCaptionLabel().set("115200");
-		baud_ddl.getCaptionLabel().getFont().setSize(14);
-		baud_ddl.getCaptionLabel().getStyle().marginTop = 8;
-		for (int i = 0; i < baud_values.length; i++) {
-			baud_ddl.addItem(baud_values[i].toString(), baud_values[i]);
-		}
+		// DropdownList baud_ddl = cP5.addDropdownList("BAUD", x, y + 10, 80,
+		// 180)
+		// .setBarHeight(28).setOpen(false);
+		// baud_ddl.getCaptionLabel().set("115200");
+		// baud_ddl.getCaptionLabel().getFont().setSize(14);
+		// baud_ddl.getCaptionLabel().getStyle().marginTop = 8;
+		// for (int i = 0; i < baud_values.length; i++) {
+		// baud_ddl.addItem(baud_values[i].toString(), baud_values[i]);
+		// }
 
-		DropdownList ports_ddl = cP5.addDropdownList("PORT", x + 90, y + 10, 274, 340).setBarHeight(28)
-				.setItemHeight(28).setOpen(false);
-		ports_ddl.getCaptionLabel().set("PORT");
-		ports_ddl.getCaptionLabel().getFont().setSize(14);
-		ports_ddl.getCaptionLabel().getStyle().marginTop = 8;
-		for (int i = 0; i < Serial.list().length; i++) {
-			ports_ddl.addItem(Serial.list()[i], i);
-		}
+//		DropdownList ports_ddl = cP5
+//				.addDropdownList("PORT", x + 90, y + 10, 274, 340)
+//				.setBarHeight(28).setItemHeight(28).setOpen(false);
+//		ports_ddl.getCaptionLabel().set("PORT");
+//		ports_ddl.getCaptionLabel().getFont().setSize(14);
+//		ports_ddl.getCaptionLabel().getStyle().marginTop = 8;
+//		for (int i = 0; i < Serial.list().length; i++) {
+//			ports_ddl.addItem(Serial.list()[i], i);
+//		}
 
 		ControlFont.sharp();
 	}
 
 	public void setup_port_led(int x, int y) {
-		Toggle toggle = cP5.addToggle("port_LED").setPosition(x, y).setSize(14, 14).setLabel("").setLock(true);
+		Toggle toggle = cP5.addToggle("port_LED").setPosition(x, y)
+				.setSize(14, 14).setLabel("").setLock(true);
 		toggle.setColorBackground(color(0, 0, 127));
 		toggle.setColorActive(color(0, 0, 255));
 	}
@@ -1538,11 +1678,13 @@ public class GRemote extends PApplet {
 		button.getCaptionLabel().setSize(14);
 		button.getCaptionLabel().getStyle().marginLeft = 10;
 
-		button = cP5.addButton("PAUSE/RESUME").setPosition(x + 92, y).setSize(88, 30);
+		button = cP5.addButton("PAUSE/RESUME").setPosition(x + 92, y)
+				.setSize(88, 30);
 		button.getCaptionLabel().setSize(14);
 		button.getCaptionLabel().getStyle().marginLeft = 15;
 
-		button = cP5.addButton("CANCEL").setPosition(x + 184, y).setSize(88, 30);
+		button = cP5.addButton("CANCEL").setPosition(x + 184, y).setSize(88,
+				30);
 		button.getCaptionLabel().setSize(14);
 		button.getCaptionLabel().getStyle().marginLeft = 15;
 	}
@@ -1570,22 +1712,26 @@ public class GRemote extends PApplet {
 	public void setup_jog_buttons(int x, int y) {
 		Toggle toggle;
 
-		toggle = cP5.addToggle("arc_mode").setPosition(x, y).setSize(122, 60).setLabel("ARCS");
+		toggle = cP5.addToggle("arc_mode").setPosition(x, y).setSize(122, 60)
+				.setLabel("ARCS");
 		toggle.getCaptionLabel().getStyle().marginTop = -31;
 		toggle.getCaptionLabel().getStyle().marginLeft = 14;
 		toggle.getCaptionLabel().getFont().setSize(14);
 
-		toggle = cP5.addToggle("xyz_mode").setPosition(x, y + 66).setSize(122, 60).setLabel("XYZ");
+		toggle = cP5.addToggle("xyz_mode").setPosition(x, y + 66)
+				.setSize(122, 60).setLabel("XYZ");
 		toggle.getCaptionLabel().getStyle().marginTop = -31;
 		toggle.getCaptionLabel().getStyle().marginLeft = 14;
 		toggle.getCaptionLabel().getFont().setSize(14);
 
-		toggle = cP5.addToggle("zero_mode").setPosition(x + 128, y).setSize(122, 60).setLabel("ZERO");
+		toggle = cP5.addToggle("zero_mode").setPosition(x + 128, y)
+				.setSize(122, 60).setLabel("ZERO");
 		toggle.getCaptionLabel().getStyle().marginTop = -31;
 		toggle.getCaptionLabel().getStyle().marginLeft = 14;
 		toggle.getCaptionLabel().getFont().setSize(14);
 
-		toggle = cP5.addToggle("mem_mode").setPosition(x + 128, y + 66).setSize(122, 60).setLabel("MEM");
+		toggle = cP5.addToggle("mem_mode").setPosition(x + 128, y + 66)
+				.setSize(122, 60).setLabel("MEM");
 		toggle.getCaptionLabel().getStyle().marginTop = -31;
 		toggle.getCaptionLabel().getStyle().marginLeft = 14;
 		toggle.getCaptionLabel().getFont().setSize(14);
@@ -1597,17 +1743,20 @@ public class GRemote extends PApplet {
 		button.getCaptionLabel().getStyle().marginLeft = 3;
 		button.getCaptionLabel().getFont().setSize(14);
 
-		button = cP5.addButton("Z-").setPosition(x + 256, y + 66).setSize(122, 60);
+		button = cP5.addButton("Z-").setPosition(x + 256, y + 66).setSize(122,
+				60);
 		button.getCaptionLabel().getStyle().marginTop = 10;
 		button.getCaptionLabel().getStyle().marginLeft = 3;
 		button.getCaptionLabel().getFont().setSize(14);
 
-		button = cP5.addButton("Y+").setPosition(x + 128, y + 134).setSize(122, 48);
+		button = cP5.addButton("Y+").setPosition(x + 128, y + 134).setSize(122,
+				48);
 		button.getCaptionLabel().getStyle().marginTop = 10;
 		button.getCaptionLabel().getStyle().marginLeft = 3;
 		button.getCaptionLabel().getFont().setSize(14);
 
-		button = cP5.addButton("Y-").setPosition(x + 128, y + 190).setSize(122, 48);
+		button = cP5.addButton("Y-").setPosition(x + 128, y + 190).setSize(122,
+				48);
 		button.getCaptionLabel().getStyle().marginTop = 10;
 		button.getCaptionLabel().getStyle().marginLeft = 3;
 		button.getCaptionLabel().getFont().setSize(14);
@@ -1617,18 +1766,21 @@ public class GRemote extends PApplet {
 		button.getCaptionLabel().getStyle().marginLeft = 3;
 		button.getCaptionLabel().getFont().setSize(14);
 
-		button = cP5.addButton("X+").setPosition(x + 256, y + 190).setSize(122, 48);
+		button = cP5.addButton("X+").setPosition(x + 256, y + 190).setSize(122,
+				48);
 		button.getCaptionLabel().getStyle().marginTop = 10;
 		button.getCaptionLabel().getStyle().marginLeft = 3;
 		button.getCaptionLabel().getFont().setSize(14);
 
 		for (int i = 0; i < jog_buttons.length; i++) {
-			((Button) cP5.getController(jog_buttons[i])).activateBy(ControlP5.PRESSED);
+			((Button) cP5.getController(jog_buttons[i]))
+					.activateBy(ControlP5.PRESSED);
 		}
 	}
 
 	public void update_jog_buttons() {
-		Boolean visible = PortResponding && (!SendingSequence || SendingSequence && Paused);
+		Boolean visible = PortResponding
+				&& (!SendingSequence || SendingSequence && Paused);
 
 		if ((int) cP5.getController("arc_mode").getValue() != (ArcMode ? 1 : 0))
 			cP5.getController("arc_mode").setValue((ArcMode ? 1 : 0));
@@ -1636,7 +1788,8 @@ public class GRemote extends PApplet {
 		if ((int) cP5.getController("xyz_mode").getValue() != (XYZMode ? 1 : 0))
 			cP5.getController("xyz_mode").setValue((XYZMode ? 1 : 0));
 
-		if ((int) cP5.getController("zero_mode").getValue() != (ZeroMode ? 1 : 0))
+		if ((int) cP5.getController("zero_mode")
+				.getValue() != (ZeroMode ? 1 : 0))
 			cP5.getController("zero_mode").setValue((ZeroMode ? 1 : 0));
 
 		if ((int) cP5.getController("mem_mode").getValue() != (MemMode ? 1 : 0))
@@ -1703,8 +1856,9 @@ public class GRemote extends PApplet {
 	}
 
 	public void setup_jog_controls(int x, int y, int y_off) {
-		ControlGroup<?> group = cP5.addGroup("GROUP_JOGGING", x, y, 380).activateEvent(true).setLabel("JOGGING")
-				.setBarHeight(28).close();
+		ControlGroup<?> group = cP5.addGroup("GROUP_JOGGING", x, y, 380)
+				.activateEvent(true).setLabel("JOGGING").setBarHeight(28)
+				.close();
 		group.getCaptionLabel().getFont().setSize(14);
 		group.getCaptionLabel().getStyle().marginTop = 10;
 
@@ -1717,13 +1871,13 @@ public class GRemote extends PApplet {
 
 		Toggle toggle;
 
-		toggle = cP5.addToggle("fractional_jog").setLabel("FRAC").setPosition(x + 50, y).setSize(14, 14)
-				.setGroup(group);
+		toggle = cP5.addToggle("fractional_jog").setLabel("FRAC")
+				.setPosition(x + 50, y).setSize(14, 14).setGroup(group);
 		toggle.getCaptionLabel().getStyle().marginTop = -14;
 		toggle.getCaptionLabel().getStyle().marginLeft = 18;
 
-		toggle = cP5.addToggle("rapid_positioning").setLabel("RAPID").setPosition(x + 95, y).setSize(14, 14)
-				.setGroup(group);
+		toggle = cP5.addToggle("rapid_positioning").setLabel("RAPID")
+				.setPosition(x + 95, y).setSize(14, 14).setGroup(group);
 		toggle.getCaptionLabel().getStyle().marginTop = -14;
 		toggle.getCaptionLabel().getStyle().marginLeft = 18;
 
@@ -1767,9 +1921,12 @@ public class GRemote extends PApplet {
 
 		int n = FractionalJog ? jog_frac_name.length : jog_dec_name.length;
 		for (int i = 0; i < n; i++) {
-			jogX_ddl.addItem(FractionalJog ? jog_frac_name[i] : jog_dec_name[i], i);
-			jogY_ddl.addItem(FractionalJog ? jog_frac_name[i] : jog_dec_name[i], i);
-			jogZ_ddl.addItem(FractionalJog ? jog_frac_name[i] : jog_dec_name[i], i);
+			jogX_ddl.addItem(FractionalJog ? jog_frac_name[i] : jog_dec_name[i],
+					i);
+			jogY_ddl.addItem(FractionalJog ? jog_frac_name[i] : jog_dec_name[i],
+					i);
+			jogZ_ddl.addItem(FractionalJog ? jog_frac_name[i] : jog_dec_name[i],
+					i);
 		}
 		jog_ddl_idx = new int[idx.size()];
 		jog_ddl_frac = new boolean[idx.size()];
@@ -1781,13 +1938,18 @@ public class GRemote extends PApplet {
 	}
 
 	public void update_jog_controls() {
-		Jogging_grp.setVisible(PortResponding && (!SendingSequence || SendingSequence && Paused));
+		Jogging_grp.setVisible(PortResponding
+				&& (!SendingSequence || SendingSequence && Paused));
 
-		if ((int) cP5.getController("fractional_jog").getValue() != (FractionalJog ? 1 : 0))
-			cP5.getController("fractional_jog").setValue((FractionalJog ? 1 : 0));
+		if ((int) cP5.getController("fractional_jog")
+				.getValue() != (FractionalJog ? 1 : 0))
+			cP5.getController("fractional_jog")
+					.setValue((FractionalJog ? 1 : 0));
 
-		if ((int) cP5.getController("rapid_positioning").getValue() != (RapidPositioning ? 1 : 0))
-			cP5.getController("rapid_positioning").setValue((RapidPositioning ? 1 : 0));
+		if ((int) cP5.getController("rapid_positioning")
+				.getValue() != (RapidPositioning ? 1 : 0))
+			cP5.getController("rapid_positioning")
+					.setValue((RapidPositioning ? 1 : 0));
 
 		if (cP5.getController("FEED X").getValue() != feed[idx.X])
 			cP5.getController("FEED X").setValue(feed[idx.X]);
@@ -1805,27 +1967,37 @@ public class GRemote extends PApplet {
 			jogZ_ddl.clear();
 			int n = FractionalJog ? jog_frac_name.length : jog_dec_name.length;
 			for (int i = 0; i < n; i++) {
-				jogX_ddl.addItem(FractionalJog ? jog_frac_name[i] : jog_dec_name[i], i);
-				jogY_ddl.addItem(FractionalJog ? jog_frac_name[i] : jog_dec_name[i], i);
-				jogZ_ddl.addItem(FractionalJog ? jog_frac_name[i] : jog_dec_name[i], i);
+				jogX_ddl.addItem(
+						FractionalJog ? jog_frac_name[i] : jog_dec_name[i], i);
+				jogY_ddl.addItem(
+						FractionalJog ? jog_frac_name[i] : jog_dec_name[i], i);
+				jogZ_ddl.addItem(
+						FractionalJog ? jog_frac_name[i] : jog_dec_name[i], i);
 			}
 			// println("jog*_ddl reloaded");
 			// println("jogX_ddl.value() = "+jogX_ddl.value());
 		}
 
 		jogX_ddl.getCaptionLabel()
-				.set(jog_ddl_frac[idx.X] ? jog_frac_name[jog_ddl_idx[idx.X]] : jog_dec_name[jog_ddl_idx[idx.X]]);
+				.set(jog_ddl_frac[idx.X]
+						? jog_frac_name[jog_ddl_idx[idx.X]]
+						: jog_dec_name[jog_ddl_idx[idx.X]]);
 
 		jogY_ddl.getCaptionLabel()
-				.set(jog_ddl_frac[idx.Y] ? jog_frac_name[jog_ddl_idx[idx.Y]] : jog_dec_name[jog_ddl_idx[idx.Y]]);
+				.set(jog_ddl_frac[idx.Y]
+						? jog_frac_name[jog_ddl_idx[idx.Y]]
+						: jog_dec_name[jog_ddl_idx[idx.Y]]);
 
 		jogZ_ddl.getCaptionLabel()
-				.set(jog_ddl_frac[idx.Z] ? jog_frac_name[jog_ddl_idx[idx.Z]] : jog_dec_name[jog_ddl_idx[idx.Z]]);
+				.set(jog_ddl_frac[idx.Z]
+						? jog_frac_name[jog_ddl_idx[idx.Z]]
+						: jog_dec_name[jog_ddl_idx[idx.Z]]);
 	}
 
 	public void setup_homing_controls(int x, int y, int y_off) {
-		ControlGroup<?> group = cP5.addGroup("GROUP_HOMING", x, y, 380).activateEvent(true).setLabel("HOMING")
-				.setBarHeight(28).close();
+		ControlGroup<?> group = cP5.addGroup("GROUP_HOMING", x, y, 380)
+				.activateEvent(true).setLabel("HOMING").setBarHeight(28)
+				.close();
 		group.getCaptionLabel().getStyle().marginTop = 10;
 		group.getCaptionLabel().getFont().setSize(14);
 
@@ -1834,50 +2006,70 @@ public class GRemote extends PApplet {
 		x = 0;
 		y = y_off;
 
-		cP5.addTextlabel("homing_limit_label", "LIMITS@ ", 0, y + 4).setGroup(group);
+		cP5.addTextlabel("homing_limit_label", "LIMITS@ ", 0, y + 4)
+				.setGroup(group);
 
 		Numberbox box;
 
-		box = cP5.addNumberbox("homing_limit_x", homing_limit[idx.X], x + 10, y + 20, 35, 14).setLabel("X")
-				.setMultiplier(0.01f).setDecimalPrecision(2).setGroup(group);
-		box.getCaptionLabel().getStyle().marginTop = -14;
-		box.getCaptionLabel().getStyle().marginLeft = -10;
-
-		box = cP5.addNumberbox("homing_limit_y", homing_limit[idx.Y], x + 10, y + 35, 35, 14).setLabel("Y")
-				.setMultiplier(0.01f).setDecimalPrecision(2).setGroup(group);
-		box.getCaptionLabel().getStyle().marginTop = -14;
-		box.getCaptionLabel().getStyle().marginLeft = -10;
-
-		box = cP5.addNumberbox("homing_limit_z", homing_limit[idx.Z], x + 10, y + 50, 35, 14).setLabel("Z")
-				.setMultiplier(0.01f).setDecimalPrecision(2).setGroup(group);
-		box.getCaptionLabel().getStyle().marginTop = -14;
-		box.getCaptionLabel().getStyle().marginLeft = -10;
-
-		box = cP5.addNumberbox("homing_infinity", homingInfinity, x + 55, y + 20, 45, 14).setLabel("INFINITY")
-				.setMultiplier(1).setMin(1).setGroup(group);
-		box.getCaptionLabel().getStyle().marginTop = 0;
-		box.getCaptionLabel().getStyle().marginLeft = 0;
-
-		box = cP5.addNumberbox("homing_feed", homingFeed, x + 105, y + 20, 40, 14).setLabel("FEED").setMultiplier(1)
-				.setMin(1).setGroup(group);
-		box.getCaptionLabel().getStyle().marginTop = 0;
-		box.getCaptionLabel().getStyle().marginLeft = 0;
-
-		Toggle toggle = cP5.addToggle("homing_set_zero").setLabel("SET ZERO").setPosition(x + 55, y).setSize(14, 14)
+		box = cP5
+				.addNumberbox("homing_limit_x", homing_limit[idx.X], x + 10,
+						y + 20, 35, 14)
+				.setLabel("X").setMultiplier(0.01f).setDecimalPrecision(2)
 				.setGroup(group);
+		box.getCaptionLabel().getStyle().marginTop = -14;
+		box.getCaptionLabel().getStyle().marginLeft = -10;
+
+		box = cP5
+				.addNumberbox("homing_limit_y", homing_limit[idx.Y], x + 10,
+						y + 35, 35, 14)
+				.setLabel("Y").setMultiplier(0.01f).setDecimalPrecision(2)
+				.setGroup(group);
+		box.getCaptionLabel().getStyle().marginTop = -14;
+		box.getCaptionLabel().getStyle().marginLeft = -10;
+
+		box = cP5
+				.addNumberbox("homing_limit_z", homing_limit[idx.Z], x + 10,
+						y + 50, 35, 14)
+				.setLabel("Z").setMultiplier(0.01f).setDecimalPrecision(2)
+				.setGroup(group);
+		box.getCaptionLabel().getStyle().marginTop = -14;
+		box.getCaptionLabel().getStyle().marginLeft = -10;
+
+		box = cP5
+				.addNumberbox("homing_infinity", homingInfinity, x + 55, y + 20,
+						45, 14)
+				.setLabel("INFINITY").setMultiplier(1).setMin(1)
+				.setGroup(group);
+		box.getCaptionLabel().getStyle().marginTop = 0;
+		box.getCaptionLabel().getStyle().marginLeft = 0;
+
+		box = cP5
+				.addNumberbox("homing_feed", homingFeed, x + 105, y + 20, 40,
+						14)
+				.setLabel("FEED").setMultiplier(1).setMin(1).setGroup(group);
+		box.getCaptionLabel().getStyle().marginTop = 0;
+		box.getCaptionLabel().getStyle().marginLeft = 0;
+
+		Toggle toggle = cP5.addToggle("homing_set_zero").setLabel("SET ZERO")
+				.setPosition(x + 55, y).setSize(14, 14).setGroup(group);
 		toggle.getCaptionLabel().getStyle().marginTop = -14;
 		toggle.getCaptionLabel().getStyle().marginLeft = 18;
 
-		cP5.addButton("HOME XY").setPosition(x + 55, y + 50).setSize(45, 14).setGroup(group);
+		cP5.addButton("HOME XY").setPosition(x + 55, y + 50).setSize(45, 14)
+				.setGroup(group);
 
-		cP5.addButton("HOME Z").setPosition(x + 105, y + 50).setSize(40, 14).setGroup(group);
+		cP5.addButton("HOME Z").setPosition(x + 105, y + 50).setSize(40, 14)
+				.setGroup(group);
 	}
 
 	public void update_homing_controls() {
-		Homing_grp.setVisible(PortResponding && (!SendingSequence || SendingSequence && Paused));
+		Homing_grp.setVisible(PortResponding
+				&& (!SendingSequence || SendingSequence && Paused));
 
-		if ((int) cP5.getController("homing_set_zero").getValue() != (HomingSetZero ? 1 : 0))
-			cP5.getController("homing_set_zero").setValue((HomingSetZero ? 1 : 0));
+		if ((int) cP5.getController("homing_set_zero")
+				.getValue() != (HomingSetZero ? 1 : 0))
+			cP5.getController("homing_set_zero")
+					.setValue((HomingSetZero ? 1 : 0));
 
 		if (cP5.getController("homing_infinity").getValue() != homingInfinity)
 			cP5.getController("homing_infinity").setValue(homingInfinity);
@@ -1887,8 +2079,8 @@ public class GRemote extends PApplet {
 	}
 
 	public void setup_arc_controls(int x, int y, int y_off) {
-		ControlGroup<?> group = cP5.addGroup("GROUP_ARCS", x, y, 380).activateEvent(true).setLabel("ARCS")
-				.setBarHeight(28).close();
+		ControlGroup<?> group = cP5.addGroup("GROUP_ARCS", x, y, 380)
+				.activateEvent(true).setLabel("ARCS").setBarHeight(28).close();
 		group.getCaptionLabel().getStyle().marginTop = 10;
 		group.getCaptionLabel().getFont().setSize(14);
 
@@ -1898,37 +2090,48 @@ public class GRemote extends PApplet {
 		y = y_off;
 
 		Textfield text;
-		text = cP5.addTextfield("ARC_RADIUS", x + 10, y, 50, 20).setLabel("R").setGroup(group);
+		text = cP5.addTextfield("ARC_RADIUS", x + 10, y, 50, 20).setLabel("R")
+				.setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -10;
 
 		Toggle toggle;
 
-		toggle = cP5.addToggle("ARC_CCW").setPosition(x + 115, y).setSize(30, 20).setGroup(group).setLabel("CCW CW")
+		toggle = cP5.addToggle("ARC_CCW").setPosition(x + 115, y)
+				.setSize(30, 20).setGroup(group).setLabel("CCW CW")
 				.setMode(ControlP5.SWITCH);
 		toggle.getCaptionLabel().getStyle().marginTop = -17;
 		toggle.getCaptionLabel().getStyle().marginLeft = -42;
 
-		text = cP5.addTextfield("ARC_START", x + 33, y + 26, 40, 20).setLabel("START@").setGroup(group);
+		text = cP5.addTextfield("ARC_START", x + 33, y + 26, 40, 20)
+				.setLabel("START@").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -33;
 
-		text = cP5.addTextfield("ARC_END", x + 105, y + 26, 40, 20).setLabel("END@").setGroup(group);
+		text = cP5.addTextfield("ARC_END", x + 105, y + 26, 40, 20)
+				.setLabel("END@").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -25;
 
-		((Textfield) cP5.getController("ARC_RADIUS")).setText(String.valueOf(arc_radius));
-		((Textfield) cP5.getController("ARC_START")).setText(String.valueOf(arc_start));
-		((Textfield) cP5.getController("ARC_END")).setText(String.valueOf(arc_end));
+		((Textfield) cP5.getController("ARC_RADIUS"))
+				.setText(String.valueOf(arc_radius));
+		((Textfield) cP5.getController("ARC_START"))
+				.setText(String.valueOf(arc_start));
+		((Textfield) cP5.getController("ARC_END"))
+				.setText(String.valueOf(arc_end));
 	}
 
 	public void update_arc_controls() {
-		Arcs_grp.setVisible(PortResponding && (!SendingSequence || SendingSequence && Paused));
+		Arcs_grp.setVisible(PortResponding
+				&& (!SendingSequence || SendingSequence && Paused));
 
 		if (UI_ReloadArcTF) {
-			((Textfield) cP5.getController("ARC_RADIUS")).setText(String.valueOf(arc_radius));
-			((Textfield) cP5.getController("ARC_START")).setText(String.valueOf(arc_start));
-			((Textfield) cP5.getController("ARC_END")).setText(String.valueOf(arc_end));
+			((Textfield) cP5.getController("ARC_RADIUS"))
+					.setText(String.valueOf(arc_radius));
+			((Textfield) cP5.getController("ARC_START"))
+					.setText(String.valueOf(arc_start));
+			((Textfield) cP5.getController("ARC_END"))
+					.setText(String.valueOf(arc_end));
 			UI_ReloadArcTF = false;
 		}
 
@@ -1938,8 +2141,9 @@ public class GRemote extends PApplet {
 	}
 
 	public void setup_setting_controls(int x, int y, int y_off) {
-		ControlGroup<?> group = cP5.addGroup("GROUP_SETTING", x, y, 380).activateEvent(true).setLabel("SETTING")
-				.setBarHeight(28).close();
+		ControlGroup<?> group = cP5.addGroup("GROUP_SETTING", x, y, 380)
+				.activateEvent(true).setLabel("SETTING").setBarHeight(28)
+				.close();
 		group.getCaptionLabel().getStyle().marginTop = 10;
 		group.getCaptionLabel().getFont().setSize(14);
 		Setting_grp = group;
@@ -1952,95 +2156,126 @@ public class GRemote extends PApplet {
 
 		Textfield text;
 
-		text = cP5.addTextfield("X_DIR_PIN", x + positionLeft, y, 50, 20).setLabel("X DIR").setGroup(group);
+		text = cP5.addTextfield("X_DIR_PIN", x + positionLeft, y, 50, 20)
+				.setLabel("X DIR").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		text = cP5.addTextfield("X_STEP_PIN", x + positionLeft, y + 26, 50, 20).setLabel("X STEP").setGroup(group);
+		text = cP5.addTextfield("X_STEP_PIN", x + positionLeft, y + 26, 50, 20)
+				.setLabel("X STEP").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		text = cP5.addTextfield("X_MIN_PIN", x + positionLeft, y + 52, 50, 20).setLabel("X MIN").setGroup(group);
+		text = cP5.addTextfield("X_MIN_PIN", x + positionLeft, y + 52, 50, 20)
+				.setLabel("X MIN").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		text = cP5.addTextfield("X_MAX_PIN", x + positionLeft, y + 78, 50, 20).setLabel("X MAX").setGroup(group);
+		text = cP5.addTextfield("X_MAX_PIN", x + positionLeft, y + 78, 50, 20)
+				.setLabel("X MAX").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		((Textfield) cP5.getController("X_DIR_PIN")).setText(String.valueOf(x_dir_pin));
-		((Textfield) cP5.getController("X_STEP_PIN")).setText(String.valueOf(x_step_pin));
-		((Textfield) cP5.getController("X_MIN_PIN")).setText(String.valueOf(x_min_pin));
-		((Textfield) cP5.getController("X_MAX_PIN")).setText(String.valueOf(x_max_pin));
+		((Textfield) cP5.getController("X_DIR_PIN"))
+				.setText(String.valueOf(x_dir_pin));
+		((Textfield) cP5.getController("X_STEP_PIN"))
+				.setText(String.valueOf(x_step_pin));
+		((Textfield) cP5.getController("X_MIN_PIN"))
+				.setText(String.valueOf(x_min_pin));
+		((Textfield) cP5.getController("X_MAX_PIN"))
+				.setText(String.valueOf(x_max_pin));
 
 		positionLeft += 96;
 
-		text = cP5.addTextfield("Y_DIR_PIN", x + positionLeft, y, 50, 20).setLabel("Y DIR").setGroup(group);
+		text = cP5.addTextfield("Y_DIR_PIN", x + positionLeft, y, 50, 20)
+				.setLabel("Y DIR").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		text = cP5.addTextfield("Y_STEP_PIN", x + positionLeft, y + 26, 50, 20).setLabel("Y STEP").setGroup(group);
+		text = cP5.addTextfield("Y_STEP_PIN", x + positionLeft, y + 26, 50, 20)
+				.setLabel("Y STEP").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		text = cP5.addTextfield("Y_MIN_PIN", x + positionLeft, y + 52, 50, 20).setLabel("Y MIN").setGroup(group);
+		text = cP5.addTextfield("Y_MIN_PIN", x + positionLeft, y + 52, 50, 20)
+				.setLabel("Y MIN").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		text = cP5.addTextfield("Y_MAX_PIN", x + positionLeft, y + 78, 50, 20).setLabel("Y MAX").setGroup(group);
+		text = cP5.addTextfield("Y_MAX_PIN", x + positionLeft, y + 78, 50, 20)
+				.setLabel("Y MAX").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		((Textfield) cP5.getController("Y_DIR_PIN")).setText(String.valueOf(y_dir_pin));
-		((Textfield) cP5.getController("Y_STEP_PIN")).setText(String.valueOf(y_step_pin));
-		((Textfield) cP5.getController("Y_MIN_PIN")).setText(String.valueOf(y_min_pin));
-		((Textfield) cP5.getController("Y_MAX_PIN")).setText(String.valueOf(y_max_pin));
+		((Textfield) cP5.getController("Y_DIR_PIN"))
+				.setText(String.valueOf(y_dir_pin));
+		((Textfield) cP5.getController("Y_STEP_PIN"))
+				.setText(String.valueOf(y_step_pin));
+		((Textfield) cP5.getController("Y_MIN_PIN"))
+				.setText(String.valueOf(y_min_pin));
+		((Textfield) cP5.getController("Y_MAX_PIN"))
+				.setText(String.valueOf(y_max_pin));
 
 		positionLeft += 96;
 
-		text = cP5.addTextfield("Z_DIR_PIN", x + positionLeft, y, 50, 20).setLabel("Z DIR").setGroup(group);
+		text = cP5.addTextfield("Z_DIR_PIN", x + positionLeft, y, 50, 20)
+				.setLabel("Z DIR").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		text = cP5.addTextfield("Z_STEP_PIN", x + positionLeft, y + 26, 50, 20).setLabel("Z STEP").setGroup(group);
+		text = cP5.addTextfield("Z_STEP_PIN", x + positionLeft, y + 26, 50, 20)
+				.setLabel("Z STEP").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		text = cP5.addTextfield("Z_MIN_PIN", x + positionLeft, y + 52, 50, 20).setLabel("Z MIN").setGroup(group);
+		text = cP5.addTextfield("Z_MIN_PIN", x + positionLeft, y + 52, 50, 20)
+				.setLabel("Z MIN").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		text = cP5.addTextfield("Z_MAX_PIN", x + positionLeft, y + 78, 50, 20).setLabel("Z MAX").setGroup(group);
+		text = cP5.addTextfield("Z_MAX_PIN", x + positionLeft, y + 78, 50, 20)
+				.setLabel("Z MAX").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		((Textfield) cP5.getController("Z_DIR_PIN")).setText(String.valueOf(z_dir_pin));
-		((Textfield) cP5.getController("Z_STEP_PIN")).setText(String.valueOf(z_step_pin));
-		((Textfield) cP5.getController("Z_MIN_PIN")).setText(String.valueOf(z_min_pin));
-		((Textfield) cP5.getController("Z_MAX_PIN")).setText(String.valueOf(z_max_pin));
+		((Textfield) cP5.getController("Z_DIR_PIN"))
+				.setText(String.valueOf(z_dir_pin));
+		((Textfield) cP5.getController("Z_STEP_PIN"))
+				.setText(String.valueOf(z_step_pin));
+		((Textfield) cP5.getController("Z_MIN_PIN"))
+				.setText(String.valueOf(z_min_pin));
+		((Textfield) cP5.getController("Z_MAX_PIN"))
+				.setText(String.valueOf(z_max_pin));
 
 		positionLeft += 96;
 
-		text = cP5.addTextfield("X_PER_MM", x + positionLeft, y, 50, 20).setLabel("X PPM").setGroup(group);
+		text = cP5.addTextfield("X_PER_MM", x + positionLeft, y, 50, 20)
+				.setLabel("X PPM").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		text = cP5.addTextfield("Y_PER_MM", x + positionLeft, y + 26, 50, 20).setLabel("Y PPM").setGroup(group);
+		text = cP5.addTextfield("Y_PER_MM", x + positionLeft, y + 26, 50, 20)
+				.setLabel("Y PPM").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		text = cP5.addTextfield("Z_PER_MM", x + positionLeft, y + 52, 50, 20).setLabel("Z PPM").setGroup(group);
+		text = cP5.addTextfield("Z_PER_MM", x + positionLeft, y + 52, 50, 20)
+				.setLabel("Z PPM").setGroup(group);
 		text.getCaptionLabel().getStyle().marginTop = -17;
 		text.getCaptionLabel().getStyle().marginLeft = -marginLeft;
 
-		((Textfield) cP5.getController("X_PER_MM")).setText(String.valueOf(x_steps_per_mm));
-		((Textfield) cP5.getController("Y_PER_MM")).setText(String.valueOf(y_steps_per_mm));
-		((Textfield) cP5.getController("Z_PER_MM")).setText(String.valueOf(z_steps_per_mm));
+		((Textfield) cP5.getController("X_PER_MM"))
+				.setText(String.valueOf(x_steps_per_mm));
+		((Textfield) cP5.getController("Y_PER_MM"))
+				.setText(String.valueOf(y_steps_per_mm));
+		((Textfield) cP5.getController("Z_PER_MM"))
+				.setText(String.valueOf(z_steps_per_mm));
 
 		Button button;
 
-		button = cP5.addButton("SAVE").setPosition(x + positionLeft - marginLeft, y + 78).setSize(50 + marginLeft, 20)
-				.setGroup(group);
+		button = cP5.addButton("SAVE")
+				.setPosition(x + positionLeft - marginLeft, y + 78)
+				.setSize(50 + marginLeft, 20).setGroup(group);
 		button.getCaptionLabel().getStyle().marginLeft = marginLeft - 6;
 
 		Properties props = System.getProperties();
@@ -2055,42 +2290,73 @@ public class GRemote extends PApplet {
 		}
 
 		try {
-			((Textfield) cP5.getController("X_DIR_PIN")).setText(settingList[1]);
-			((Textfield) cP5.getController("X_STEP_PIN")).setText(settingList[2]);
-			((Textfield) cP5.getController("X_MIN_PIN")).setText(settingList[3]);
-			((Textfield) cP5.getController("X_MAX_PIN")).setText(settingList[4]);
-			((Textfield) cP5.getController("Y_DIR_PIN")).setText(settingList[5]);
-			((Textfield) cP5.getController("Y_STEP_PIN")).setText(settingList[6]);
-			((Textfield) cP5.getController("Y_MIN_PIN")).setText(settingList[7]);
-			((Textfield) cP5.getController("Y_MAX_PIN")).setText(settingList[8]);
-			((Textfield) cP5.getController("Z_DIR_PIN")).setText(settingList[9]);
-			((Textfield) cP5.getController("Z_STEP_PIN")).setText(settingList[10]);
-			((Textfield) cP5.getController("Z_MIN_PIN")).setText(settingList[11]);
-			((Textfield) cP5.getController("Z_MAX_PIN")).setText(settingList[12]);
-			((Textfield) cP5.getController("X_PER_MM")).setText(settingList[13]);
-			((Textfield) cP5.getController("Y_PER_MM")).setText(settingList[14]);
-			((Textfield) cP5.getController("Z_PER_MM")).setText(settingList[15]);
+			((Textfield) cP5.getController("X_DIR_PIN"))
+					.setText(settingList[1]);
+			((Textfield) cP5.getController("X_STEP_PIN"))
+					.setText(settingList[2]);
+			((Textfield) cP5.getController("X_MIN_PIN"))
+					.setText(settingList[3]);
+			((Textfield) cP5.getController("X_MAX_PIN"))
+					.setText(settingList[4]);
+			((Textfield) cP5.getController("Y_DIR_PIN"))
+					.setText(settingList[5]);
+			((Textfield) cP5.getController("Y_STEP_PIN"))
+					.setText(settingList[6]);
+			((Textfield) cP5.getController("Y_MIN_PIN"))
+					.setText(settingList[7]);
+			((Textfield) cP5.getController("Y_MAX_PIN"))
+					.setText(settingList[8]);
+			((Textfield) cP5.getController("Z_DIR_PIN"))
+					.setText(settingList[9]);
+			((Textfield) cP5.getController("Z_STEP_PIN"))
+					.setText(settingList[10]);
+			((Textfield) cP5.getController("Z_MIN_PIN"))
+					.setText(settingList[11]);
+			((Textfield) cP5.getController("Z_MAX_PIN"))
+					.setText(settingList[12]);
+			((Textfield) cP5.getController("X_PER_MM"))
+					.setText(settingList[13]);
+			((Textfield) cP5.getController("Y_PER_MM"))
+					.setText(settingList[14]);
+			((Textfield) cP5.getController("Z_PER_MM"))
+					.setText(settingList[15]);
 		} catch (Exception e) {
-			((Textfield) cP5.getController("X_DIR_PIN")).setText(String.valueOf(x_dir_pin));
-			((Textfield) cP5.getController("X_STEP_PIN")).setText(String.valueOf(x_step_pin));
-			((Textfield) cP5.getController("X_MIN_PIN")).setText(String.valueOf(x_min_pin));
-			((Textfield) cP5.getController("X_MAX_PIN")).setText(String.valueOf(x_max_pin));
-			((Textfield) cP5.getController("Y_DIR_PIN")).setText(String.valueOf(y_dir_pin));
-			((Textfield) cP5.getController("Y_STEP_PIN")).setText(String.valueOf(y_step_pin));
-			((Textfield) cP5.getController("Y_MIN_PIN")).setText(String.valueOf(y_min_pin));
-			((Textfield) cP5.getController("Y_MAX_PIN")).setText(String.valueOf(y_max_pin));
-			((Textfield) cP5.getController("Z_DIR_PIN")).setText(String.valueOf(z_dir_pin));
-			((Textfield) cP5.getController("Z_STEP_PIN")).setText(String.valueOf(z_step_pin));
-			((Textfield) cP5.getController("Z_MIN_PIN")).setText(String.valueOf(z_min_pin));
-			((Textfield) cP5.getController("Z_MAX_PIN")).setText(String.valueOf(z_max_pin));
-			((Textfield) cP5.getController("X_PER_MM")).setText(String.valueOf(x_steps_per_mm));
-			((Textfield) cP5.getController("Y_PER_MM")).setText(String.valueOf(y_steps_per_mm));
-			((Textfield) cP5.getController("Z_PER_MM")).setText(String.valueOf(z_steps_per_mm));
+			((Textfield) cP5.getController("X_DIR_PIN"))
+					.setText(String.valueOf(x_dir_pin));
+			((Textfield) cP5.getController("X_STEP_PIN"))
+					.setText(String.valueOf(x_step_pin));
+			((Textfield) cP5.getController("X_MIN_PIN"))
+					.setText(String.valueOf(x_min_pin));
+			((Textfield) cP5.getController("X_MAX_PIN"))
+					.setText(String.valueOf(x_max_pin));
+			((Textfield) cP5.getController("Y_DIR_PIN"))
+					.setText(String.valueOf(y_dir_pin));
+			((Textfield) cP5.getController("Y_STEP_PIN"))
+					.setText(String.valueOf(y_step_pin));
+			((Textfield) cP5.getController("Y_MIN_PIN"))
+					.setText(String.valueOf(y_min_pin));
+			((Textfield) cP5.getController("Y_MAX_PIN"))
+					.setText(String.valueOf(y_max_pin));
+			((Textfield) cP5.getController("Z_DIR_PIN"))
+					.setText(String.valueOf(z_dir_pin));
+			((Textfield) cP5.getController("Z_STEP_PIN"))
+					.setText(String.valueOf(z_step_pin));
+			((Textfield) cP5.getController("Z_MIN_PIN"))
+					.setText(String.valueOf(z_min_pin));
+			((Textfield) cP5.getController("Z_MAX_PIN"))
+					.setText(String.valueOf(z_max_pin));
+			((Textfield) cP5.getController("X_PER_MM"))
+					.setText(String.valueOf(x_steps_per_mm));
+			((Textfield) cP5.getController("Y_PER_MM"))
+					.setText(String.valueOf(y_steps_per_mm));
+			((Textfield) cP5.getController("Z_PER_MM"))
+					.setText(String.valueOf(z_steps_per_mm));
 		}
 	}
 
 	public void update_setting_controls() {
-		Setting_grp.setVisible(PortResponding && (!SendingSequence || SendingSequence && Paused));
+		Setting_grp.setVisible(PortResponding
+				&& (!SendingSequence || SendingSequence && Paused));
 	}
 
 	public void update_textfields() {
@@ -2158,19 +2424,21 @@ public class GRemote extends PApplet {
 	}
 
 	public void update_groups() {
-		Jogging_grp.setColorLabel(Jogging_grp.isOpen() ? 0xFFFFFFFF : 0xFF888888);
+		Jogging_grp
+				.setColorLabel(Jogging_grp.isOpen() ? 0xFFFFFFFF : 0xFF888888);
 
 		Homing_grp.setColorLabel(Homing_grp.isOpen() ? 0xFFFFFFFF : 0xFF888888);
 
 		Arcs_grp.setColorLabel(Arcs_grp.isOpen() ? 0xFFFFFFFF : 0xFF888888);
 
-		Setting_grp.setColorLabel(Setting_grp.isOpen() ? 0xFFFFFFFF : 0xFF888888);
+		Setting_grp
+				.setColorLabel(Setting_grp.isOpen() ? 0xFFFFFFFF : 0xFF888888);
 	}
 
 	// Conversion, helpers etc
 
 	class EnumXYZ {
-		public String strVal[] = { "X", "Y", "Z" };
+		public String strVal[] = {"X", "Y", "Z"};
 
 		public int X = 0;
 		public int Y = 1;
@@ -2186,8 +2454,9 @@ public class GRemote extends PApplet {
 	}
 
 	class EnumAZ {
-		public String strVal[] = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q",
-				"R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
+		public String strVal[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I",
+				"J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
+				"W", "X", "Y", "Z"};
 		public int A = 0;
 		public int B = 1;
 		public int C = 2;
@@ -2234,7 +2503,7 @@ public class GRemote extends PApplet {
 	}
 
 	public float[] polar2cartesian(float r, float t) {
-		float[] xy = { 0.0f, 0.0f };
+		float[] xy = {0.0f, 0.0f};
 		xy[idx.X] = (float) (r * Math.cos(Math.toRadians(t)));
 		xy[idx.Y] = (float) (r * Math.sin(Math.toRadians(t)));
 		return xy;
@@ -2258,15 +2527,16 @@ public class GRemote extends PApplet {
 	/**
 	 * Single entry point.
 	 * 
-	 * @param passedArgs Command line arguments.
+	 * @param passedArgs
+	 *            Command line arguments.
 	 */
 	static public void main(String[] passedArgs) {
-		String[] appletArgs = new String[] { "GRemote" };
-
-		if (passedArgs != null) {
-			PApplet.main(concat(appletArgs, passedArgs));
-		} else {
-			PApplet.main(appletArgs);
-		}
+		// String[] appletArgs = new String[]{"GRemote"};
+		//
+		// if (passedArgs != null) {
+		// PApplet.main(concat(appletArgs, passedArgs));
+		// } else {
+		// PApplet.main(appletArgs);
+		// }
 	}
 }
